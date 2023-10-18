@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz_scheduled; // scheduled notif
 import 'package:simple_notification/utils/received_notification.dart';
 
 final selectNotificationSubject = BehaviorSubject<String?>();
@@ -15,6 +16,7 @@ final didReceiveLocalNotificationSubject =
     BehaviorSubject<ReceivedNotification>();
 
 class NotificationHelper {
+  // _channel properties for >= Android 8 (Oreo)
   static const _channelId = "01";
   static const _channelName = "channel_01";
   static const _channelDesc = "dicoding channel";
@@ -28,6 +30,8 @@ class NotificationHelper {
 
   Future<void> initNotifications(
       FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
+    tz_scheduled.initializeTimeZones(); // scheduled notif
+
     var initializationSettingsAndroid =
         const AndroidInitializationSettings('app_icon'); // Ikon notifikasi
 
@@ -151,8 +155,10 @@ class NotificationHelper {
   }
 
   Future<void> scheduleNotification(
-      FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin) async {
-    var dateTime = tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5));
+      FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
+      int seconds) async {
+    var dateTime = tz.TZDateTime.now(tz.local).add(Duration(seconds: seconds));
+
     var vibrationPattern = Int64List(4);
     vibrationPattern[0] = 0;
     vibrationPattern[1] = 1000;
@@ -188,10 +194,11 @@ class NotificationHelper {
       'scheduled body',
       dateTime,
       platformChannelSpecifics,
-      payload: 'scheduled notification',
+      androidScheduleMode:
+          AndroidScheduleMode.exactAllowWhileIdle, // scheduled notif
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      androidAllowWhileIdle: true,
+      payload: 'scheduled notification',
     );
   }
 

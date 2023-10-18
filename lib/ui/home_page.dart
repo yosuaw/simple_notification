@@ -64,6 +64,14 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 10),
                 CustomButton(
+                  text: 'Show scheduled notification with payload',
+                  onPressed: () async {
+                    await _notificationHelper
+                        .scheduleNotification(flutterLocalNotificationsPlugin, 2);
+                  },
+                ),
+                const SizedBox(height: 10),
+                CustomButton(
                   text: 'Show grouped notifications [Android]',
                   onPressed: () async {
                     await _notificationHelper.showGroupedNotifications(
